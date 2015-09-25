@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://xmlns.jcp.org/jsf/passthrough"
+        template="/WEB-INF/templates/template.xhtml"
+        xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{sessionBB.loadWall}"/>
+        </f:metadata>
+    </ui:define>
+    <ui:define name="jumbotron"/>
+    <ui:define name="main">
+        <h:panelGroup class="text-center" layout="block">
+            <c:forEach items="#{sessionBB.wall}" var="message" rendered="#{sessionBB.wall.size() gt 0}">
+                <h:panelGroup layout="block" class="message-block">
+                    <strong><h:outputText value="#{message.user}: "/></strong>
+                    <p><h:outputText value="#{message.text}"/></p>
+                    <h:outputText value="#{message.date}"/><br/>
+                    <h:panelGroup layout="span">
+                        <h:outputText value="A #{message.mapaUsersMeGusta.size()} persona(s) le(s) gusta este mensaje" class="text-success" rendered="#{not message.mapaUsersMeGusta.containsKey(sessionBB.user.user)}"/><br/>
+                        <h:outputText value="A ti y a #{message.mapaUsersMeGusta.size()-1} persona(s) más le(s) gusta este mensaje" class="text-success" rendered="#{message.mapaUsersMeGusta.containsKey(sessionBB.user.user)}"/><br/>
+                        <h:form rendered="#{not message.mapaUsersMeGusta.containsKey(sessionBB.user.user)}">
+                            <h:commandButton action="#{sessionBB.likeMessage(message.id, message.user)}" value="Me gusta" class="btn btn-default"/>
+                        </h:form>
+                    </h:panelGroup>
+                    <h:panelGroup layout="span">
+                        <input type="button" class="btn btn-primary" data-toggle="collapse" data-target="#message-#{message.id}" value="Ver/ocultar comentarios"/>
+                    </h:panelGroup>
+                    <div layout="block" id="message-#{message.id}" class="collapse">
+                        <ui:repeat value="#{message.comentarios}" var="comment"  rendered="#{message.comentarios.size() gt 0}">
+                            <h:panelGroup layout="block" class="comment-block">
+                                <strong><h:outputText value="#{comment.user}"/></strong>
+                                <p><h:outputText value="#{comment.text}"/></p>
+                                <h:outputText value="#{comment.date}"/><br/>
+                            </h:panelGroup>
+                        </ui:repeat>
+                        <h:form>
+                            <h:inputTextarea value="#{sessionBB.message.text}" required="true" p:placeholder="Nuevo Comentario" rows="4" cols="100"/><br/>
+                            <h:commandButton action="#{sessionBB.newComment(message.id)}" value="Nuevo Comentario"/>
+                        </h:form>
+                        <input type="button" class="btn btn-primary" data-toggle="collapse" data-target="#message-#{message.id}" value="Ocultar comentarios"/>
+                    </div>
+                </h:panelGroup>
+            </c:forEach>
+        </h:panelGroup>
+        <h:panelGroup class="text-center form-horizontal" layout="block">
+            <h:form>
+                <h:inputTextarea class="form-control" value="#{sessionBB.message.text}" required="true" p:placeholder="Nuevo mensaje" rows="5" label="Mensaje"/>
+                <h:commandButton action="#{sessionBB.newMessage}" value="Nuevo Mensaje"/>
+            </h:form>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
